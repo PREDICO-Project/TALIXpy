@@ -1,6 +1,5 @@
-# NOT FINISHED
 
-# PC Simulation
+# PCI Simulation
 In this framework you can simulate the propagation of a wavefront and its detection.. The code is based on python libraries.
 
 ## Table Of Contents
@@ -9,15 +8,8 @@ In this framework you can simulate the propagation of a wavefront and its detect
    * [X-Ray Beam](#X-Ray-Beam)
    * [Sample](#Sample)
    * [Propagation](#Propagation)
-* [DPC Images](#DPC-Images)
-* [Phase Image](#Phase-Image)
-* [Data Folder](#Data-Folder)
-* [Outputs](#Outputs)
-* [How to run](#How-to-run)
-* [Notebooks](#Notebooks)
-* [Simple Numerical Simulation](#Simple-Numerical-Simulation)
-* [Dependencies](#Dependencies)
-* [References](#References)
+   * [Experiments](#Experiments)
+   * [Detector](#Detector)
 * [Contact](#Contact)
 
 
@@ -67,14 +59,7 @@ For example if you want to create a Sphere made of PMMA with a radius of 120 pix
 
 ```python
 import Objects as obj
-n = 1000 # Number of pixels in each direction
-radius = 120 # Radius in pixels
-pixels_size = 1 # um
-material = 'PMMA'
-x_shift = 0 # 0 == Centered
-y_shift = 0 # 0 == Centered
-
-Sphere = obj.Sphere(n,radius,pixel_size,material,x_shift, y_shift)
+Sample = obj.Cylinder(n, outer_radius=300, inner_radius=50,Orientation='Vertical',pixel_size=pixel_size, material='PMMA', DSO = 10, x_shift_px=0, y_shift_px=0)
 
 ```
 
@@ -88,49 +73,30 @@ It is called free space propagator. Once the propagator is defined it's importan
 
 $$T_{prop} =F^{-1}\left[H\left(k\right)\cdot F\left[T\left(x,y\right)\right]\right]$$
 
+## Experiments
 
+The framework allows choosing between two experimental setups:
 
-## DPC Images
+- **Inline (Propagation-Based Imaging, PBI)**  
+  In this setup, the object is placed directly in the beam path, and the phase effects are revealed by free-space propagation before reaching the detector. No gratings are required, but the setup is highly sensitive to source coherence and distances. 
 
-Once the sine function is retrieve, we can retrieve the DPC Images. Using the Talbot-Lau interferometer and the phase stepping method it is posible to obtain the Differential Phase Contrast Image, which contains the information about the Phase Gradient introduced by the object. It is also posible to obtain the Transmission image and the last Image is the Dark Field Image which is related to the scattering produced by microstructures. Here we have defined this images like:
+- **Phase Stepping (Talbot-Lau Interferometry)**  
+  This setup uses a combination of gratings (G1, G2) to convert phase shifts into intensity modulations that can be retrieved by scanning one of the gratings (typically G2). Spatial coherence is assumed and G0 is not simulated.
+  The phase stepping procedure allows separating **absorption**, **differential phase**, and **dark-field** signals.
 
+Users can select the desired experiment through the **Experiments** module.
 
-$$ DPC = p_{obj}-p_r;\quad\quad
-T = \frac{a_{0,obj}}{a_{0,r}};\quad\quad
-DF = \frac{a_{1,obj}\cdot a_{{0,r}}}{a_{1,r}\cdot a_{0,obj}}$$
+## Detector
 
-## Phase Image
-In principle, it is possible to obtain the Phase Image from the DPC Image through a straightforward integration over the x-direction. However, certain artifacts, such as horizontal fringes, emerge due to noise and image imperfections. 
+The detector is responsible for recording the propagated intensity and downsampling the image to the physical detector pixel size,. In our framework, two main options are implemented:
 
-<p align="center">
- <img src="./Readme_Images/DPC.png" width="30%"></img>
- <img src="./Readme_Images/Phase_integration.png" width="30%"></img>
- <img src="./Readme_Images/Phase_wiener.png" width="30%"></img>
-</p>
+- **Ideal Detector**  
+  The detector directly samples the propagated intensity at the given pixel size, without convolution with the PSF of the detector or noise. This is useful for purely theoretical studies.
 
+- **Realistic Detector**  
+  Includes the effects of the point spread function (PSF) and optionally noise models (Poisson, Gaussian, etc.). This makes the simulation closer to experimental conditions.
 
-
-## Data Folder
-
-
-## Outputs
-
-
-## How to run
-
-## Notebooks
-There is a Jupyter Notebook into the [Notebooks Folder](Notebooks) with some useful examples.
-
-
-## Dependencies
-
-```
-pip install -r requirements.txt
-```
-
-## References
-
-
+The detector parameters (pixel size, PSF width, noise type) can be adjusted in the **Detector** class, allowing users to explore how detector performance influences image quality.
 
 ## Contact
 If there is any doubt please contact at the following e-mail: vicsan05@ucm.es
