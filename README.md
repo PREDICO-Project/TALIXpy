@@ -56,7 +56,7 @@ This module performs simulation of Propagation-based Imaging (PBI) and Talbot-La
 This module specializes in simulating Moir\'{e} artifacts in TLPCI, computing the Intensity Modulation Curve with artifacts due to step and dose fluctuations. For more information refer to its [Notebook](Notebooks/MoireSim.ipynb) and [README](src/Simple_Numerical_Simulation/Readme.md) file. 
 
 ## TLRec
-This module specifically handles the phase-stepping analysis of Talbot-Lau interferometer images for phase-contrast image retrieval. For more information refer to its [Notebook](Notebooks/TLRec.ipynb) and [README](src/TLRec/Readme.md) file. 
+This module specifically handles the phase-stepping analysis of Talbot-Lau interferometer images for phase-contrast image retrieval. For more information refer to its [Notebook](Notebooks/TLRec.ipynb) and [README](src/TLRec/README.md) file. 
 ## Dependencies
 We have use some functions from some well known python libraries, the libraries used are:
 * numpy

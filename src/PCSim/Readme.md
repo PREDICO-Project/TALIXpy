@@ -63,11 +63,11 @@ Sample = obj.Cylinder(n, outer_radius=300, inner_radius=50,Orientation='Vertical
 The most important thing is to apply the effects due to the propagation of the wavefront.  
 We have defined the propagator as:
 
-$$H\left(k\right)=\exp\left[-i\pi \lambda z(f_x^2+f_y^2)\right]$$
+$$H\left(f_x,f_y, z\right)=\exp\left[-i\pi \lambda z(f_x^2+f_y^2)\right]$$
 
 Once the propagator is defined, it's important to know how to apply it to a wavefront. The way to do that is with the convolution. However, it is easier to perform the propagation in the Fourier space:
 
-$$T_{prop} = F^{-1}\left[H\left(k\right)\cdot F\left[T\left(x,y\right)\right]\right]$$
+$$T_{prop} = F^{-1}\left[H\left(f_x,f_y, z\right)\cdot F\left[T\left(x,y\right)\right]\right]$$
 
 In practice, the propagation is implemented using Fast Fourier Transforms (FFT).  
 This allows simulating Fresnel diffraction efficiently, even for large 2D images.
