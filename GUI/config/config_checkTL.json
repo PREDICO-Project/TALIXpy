@@ -1,0 +1,14 @@
+ {
+    "n": 1000,
+    "pixel_size": 1, 
+    "energy": 20,
+    "period": 200,
+    "DC": 0.5,
+    "material": "Au",
+    "bar_height": 40,
+    "multiples": 1,
+    "iterations": 250,
+    "grating_option": "Phase pi/2",
+    "image_option": "Ideal",
+    "resolution": 20
+}

@@ -1,0 +1,4 @@
+The spectra's text files have the information about the energies and their respective intensities. 
+First Column: Energy in keV.
+Second Column: Intensities (no necessary to normalize them). 
+

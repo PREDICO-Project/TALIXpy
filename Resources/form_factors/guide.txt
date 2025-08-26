@@ -1,0 +1,9 @@
+Ref: https://physics.nist.gov/PhysRefData/FFast/html/form.html
+
+First Column: Energy (keV)
+Second Column: f1 (e/atom)
+Third Column: f1 (e/atom)
+Fourth Column: mass attenuation coef. phot. (cm2/g)
+Fifth Column: mass attenuation coef. cohe+incoh (cm2/g)
+Sixth Column: mass attenuation coef. total (cm2/g)
+Seventh Column: wavelength (nm)

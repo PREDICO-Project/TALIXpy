@@ -1,0 +1,25 @@
+__pycache__/
+
+# Virtual Environment
+venv/
+
+Notebooks/Results/
+Data/
+Output/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Formats
+**/*.tif
+**/*.dcm
+*.tif
+*.dcm
+*.log
+*.vrml
+*.out
+*.pdf
+test*
+
+# Files
+Notebooks/test*
