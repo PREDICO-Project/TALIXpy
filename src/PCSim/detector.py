@@ -89,21 +89,18 @@ class Detector():
         else:
             raise ValueError("image must be 2D or 3D (Z,H,W).")      
           
-    def add_noise(self, image, rng=None):
+    def add_noise(self, image):
         """
         Add simple Gaussian or Poisson noise.
 
         Parameters
         ----------
         image : np.ndarray (2D)
-        rng : np.random.Generator or None
         """
         if self.noise_type is None:
             return image
 
-        # Random noise
-        if rng is None:
-            rng = np.random.default_rng()
+        rng = np.random.default_rng()
         # Gaussian noise
         if self.noise_type.lower() == "gaussian":
             if self.gaussian_sigma <= 0:
