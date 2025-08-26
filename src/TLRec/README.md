@@ -168,12 +168,7 @@ Phase_wiener = utils.Calculate_Phase_Wiener_filter(Diff_Phase, x_pixel_size, y_p
 ```
 
 With the parameters v0, n and s are the frequency cut-off in $mm^{-1}$, n is an integer (1 or 2) and s tries to estimate the SNR of the image, you can try which configuration works better with your images (see Reference [2]).
-## Notebooks
-There is a Jupyter Notebook into the [Notebooks Folder](Notebooks) with an example of how to use the function to obtain the DPC images.
 
-## Simple Numerical Simulation
-In [Simple_Numerical_Simulation](Simple_Numerical_Simulation) there are some functions to simulate very easily an acquisition. In this case, the Intensity Modulation Curve is calculated for each pixel using the equation written above. You can choose if you want error in the phase steps or in the dose. Also you can add some noise. 
-**It does not pretend to be a realistic simulation of the system**.
 
 ## Dependencies
 We have use some functions from some well known python libraries, the libraries used are:
