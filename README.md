@@ -11,8 +11,6 @@ TLRec (Talbot-Lau Reconstruction) is an open-source code to retrieve the phase c
 * [DPC Images](#DPC-Images)
 * [Phase Image](#Phase-Image)
 * [GUI built with Tkinter](#GUI-built-with-Tkinter)
-* [Data Folder](#Data-Folder)
-* [Outputs](#Outputs)
 * [How to run](#How-to-run)
 * [Notebooks](#Notebooks)
 * [Simple Numerical Simulation](#Simple-Numerical-Simulation)
@@ -125,13 +123,6 @@ Upon completion of all calculations, you will be presented with the Phase Gradie
 <p align="center">
  <img src="./Readme_Images/TLeRecGUI.png" width="80%"></img>
 </p>
-
-## Data Folder
-In [Data Folder](Data) you can put your raw images as .tif stack to retrieve the DPC images.
-
-
-## Outputs
-In [Output Folder](Output) you can save the Output images.
 
 ## How to run
 
