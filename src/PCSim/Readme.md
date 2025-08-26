@@ -5,7 +5,7 @@ In this framework you can simulate the propagation of a wavefront and its detect
 ## Table Of Contents
 * [Introduction](#Introduction)
 * [Simulation Structure](#Simulation-Structure)
-   * [X-Ray Beam](#X-Ray-Beam)
+   * [X-Ray Source](#X-Ray-Source)
    * [Sample](#Sample)
    * [Propagation](#Propagation)
    * [Experiments](#Experiments)
@@ -22,15 +22,10 @@ Here we summarize how the simulation is performed. The idea is to defined how th
 
 Reference [1]: Bartels, M. (2013). Cone-beam x-ray phase contrast tomography of biological samples. Göttingen Series in X-Ray Physics. https://doi.org/10.17875/gup2013-92
 
-### X-Ray Beam
-First, we need to define the X-Ray beam. Currently, we can only simulate either a Plane or Cone Beam. In the case of a Plane Beam, there will be no magnification. The beam's spectrum can be either monoenergetic or defined in a .txt file. This .txt file should be located in the 'Spectra' folder, with the first column representing energy in keV and the second column indicating intensity for each energy.
+### X-Ray Source
+The class **Source** manages all properties of the X-ray source.  
+This includes defining its geometry (point, extended, microfocus), spatial distribution (plane or cone beam), and spectrum (monoenergetic or polychromatic).  
 
-To facilitate this, we've created a class called **Beam** in [Spectra.py](PC/Spectra.py). This class precisely defines our X-Ray beam. In the following example, we will create a polychromatic spectrum using the file Mo_30kVp_spectrum.txt and shape it conically. For a monoenergetic beam, the energy value (in this case, 23 keV) must be explicitly specified.
-
-```python
-import Spectra
-XRaySpectrum = Spectra.Beam('Mo_30kVp_spectrum', 23, 'Cone')
-```
 
 ### Sample
 
