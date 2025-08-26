@@ -133,13 +133,13 @@ Design_energy = 35 #keV
 The last thing is to write the reconstruction algorithm used and run the function to perform the retrieval of the DPC images.
 ```python
 rec_type = 'Fast_FFT'
-Diff_Phase, attenuation, transmission, Dark_Field, Phase,  SC_Phase_reference, SC_Phase_object = Experimental_Retrieval.Modulation_Curve_Reconstruction(images, images_reference,                                                                                                           
+Diff_Phase, absorption, transmission, Dark_Field, Phase,  SC_Phase_reference, SC_Phase_object = Experimental_Retrieval.Modulation_Curve_Reconstruction(images, images_reference,                                                                                                           
     G2_Period,DSO, DOD, DG1_Object, Design_energy, type=rec_type)
 ```
 
 The outputs are:
 * Diff_Phase = Differential Phase Contrast Image
-* attenuation = Attenuation Image defined as $ln\left(\frac{I_{0,obj}}{I_{0,ref}}\right)$
+* absorption = Absorbtion Image defined as $ln\left(\frac{I_{0,obj}}{I_{0,ref}}\right)$
 * transmission = Transmission Image defined as $\frac{I_{0,obj}}{I_{0,ref}}$
 * Dark_Field = Dark Field Image defined as $\frac{V_{obj}}{V_{ref}}$
 * Phase = Integrate Phase obtained by direct integration of Diff_Phase

@@ -77,7 +77,7 @@ def Modulation_Curve_Reconstruction(images, images_reference,G2Period,DSO, DOD, 
 
   Returns:
       DPC (numpy array): Differential Phase Contrast Image
-      At (numpy array): Attenuation Image defined as -ln(I0,obj/I0,ref)
+      Abs (numpy array): Absorption Image defined as -ln(I0,obj/I0,ref)
       Transmission (numpy array): Transmission Image defined as (I0,obj/I0,ref)
       DF (numpy array):  Dark Field Image defined as (Vobj/Vref)
       Phase (numpy array): Phase Image defined as the direct integration of the DPC image.
@@ -153,7 +153,7 @@ def Modulation_Curve_Reconstruction(images, images_reference,G2Period,DSO, DOD, 
     DPC = utils.check_limits_DPC(DPC) 
     
   DF = v/v_r
-  At = -np.log(o/o_r)
+  Abs = -np.log(o/o_r)
   Transmission = o/o_r
 
   Phase = utils.Get_Phase(DPC, G2Period,DG1O,DSO, wavelength, pixel_size,DOD)
@@ -161,7 +161,7 @@ def Modulation_Curve_Reconstruction(images, images_reference,G2Period,DSO, DOD, 
   Phase_Stepping_Curve_reference = utils.check_limits_DPC(Phase_Stepping_Curve_reference)
   Phase_Stepping_Curve_object = p
   Phase_Stepping_Curve_object = utils.check_limits_DPC(Phase_Stepping_Curve_object)
-  return DPC, At, Transmission, DF, Phase, Phase_Stepping_Curve_reference, Phase_Stepping_Curve_object
+  return DPC, Abs, Transmission, DF, Phase, Phase_Stepping_Curve_reference, Phase_Stepping_Curve_object
 
 
 
