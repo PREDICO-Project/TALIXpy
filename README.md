@@ -1,6 +1,6 @@
 
 # TALIXpy
-TALIXpy (TAlbot Lau Imaging X-ray in Python) is an open-source software developed in Python, designed for both the simulation of X-ray PCI, including Propagation-Based Imaging (PBI) and Talbot-Lau Phase-Contrast Imaging (TLPCI), and the reconstruction of TLPCI images. TALIXpy implements the phase stepping method for image retrieval, offering both least-squares and Fast Fourier Transform (FFT)-based reconstruction algorithms. It notably includes an algorithm for correcting phase step and dose fluctuations, which helps mitigate reconstruction artifacts like Moir\'{e} patterns.
+TALIXpy (TAlbot Lau Imaging X-ray in Python) is an open-source software developed in Python, designed for both the simulation of X-ray PCI, including Propagation-Based Imaging (PBI) and Talbot-Lau Phase-Contrast Imaging (TLPCI), and the reconstruction of TLPCI images. TALIXpy implements the phase stepping method for image retrieval, offering both least-squares and Fast Fourier Transform (FFT)-based reconstruction algorithms. It notably includes an algorithm for correcting phase step and dose fluctuations, which helps mitigate reconstruction artifacts like Moiré patterns.
 
 ## Table Of Contents
 * [How to run](#How-to-run)
