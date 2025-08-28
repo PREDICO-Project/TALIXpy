@@ -96,7 +96,7 @@ def Experiment_Inline(n, Geometry, Source, Detector,Objects, padding = 0):
         M_source = 1
     else:
         M_source = M_global
-    Intensity = Source.PSF_blurr(Intensity, current_pixel_size=px_det, Magnification=M_source)
+    Intensity = Source.PSF_blurr(Intensity, current_pixel_size=px_ref, Magnification=M_source)
 
 
     if Detector.Image_option == 'Realistic':
