@@ -50,12 +50,12 @@ def Experiment_Inline(n, Geometry, Source, Detector,Objects, padding = 0):
 
         
         z_prev = Objects_sorted[0].DSO
-        px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_prev, conical)
+        #px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_prev, conical) # Previous Implementation
 
         # Apply transmission function
-        T0 = Objects_sorted[0].transmission_function(energy, px)
+        T0 = Objects_sorted[0].transmission_function(energy, px_ref)
         u *= T0
-
+       
         #plt.imshow(np.abs(u))
         #plt.show()
         for obj in Objects_sorted[1:]:
@@ -64,27 +64,30 @@ def Experiment_Inline(n, Geometry, Source, Detector,Objects, padding = 0):
             M = Geometry.calculate_magnification(z_prev, z_next, conical)
             if dz > 0:
                 # Propagate 
-                u = prop.propagate(u, px, dz/M, energy, padding= padding)
+                u = prop.propagate(u, px_ref, dz/M, energy, padding= padding)
                 # Update sampling
-                px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_next, conical)
+                #px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_next, conical) # Previous Implementation
+
+                u = zoom_in(u, M)
 
             # Apply transmission at z_next
-            Tn = obj.transmission_function(energy, px)
+            Tn = obj.transmission_function(energy, px_ref)
             u *= Tn
             z_prev = z_next
 
-       
+        
         dz = z_det - z_prev
     
         M = Geometry.calculate_magnification(z_prev, z_det, conical)
         if dz > 0:
             # Propagate with sampling of the last object plane
-            u = prop.propagate(u, px, dz/M, energy, padding= padding)
-            px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_det, conical)
+            u = prop.propagate(u, px_ref, dz/M, energy, padding= padding)
+            u = zoom_in(u, M)
+            #px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_det, conical) # Previous Implementation
 
         # Intensity on detector
         I = np.abs(u) ** 2
-
+       
         Intensity += I * (energy_weights[i])
     px_det = Geometry.pixel_size_at_distance(px_ref, z_ref, z_det, conical)
     M_global = Geometry.calculate_magnification(z_ref, z_det, conical)
@@ -92,12 +95,12 @@ def Experiment_Inline(n, Geometry, Source, Detector,Objects, padding = 0):
     if M == 1:
         M_source = 1
     else:
-        M_source = M_global-1
+        M_source = M_global
     Intensity = Source.PSF_blurr(Intensity, current_pixel_size=px_det, Magnification=M_source)
 
 
     if Detector.Image_option == 'Realistic':
-        Intensity = Detector.applyDetector(Intensity, current_pixel_size=px_det)
+        Intensity = Detector.applyDetector(Intensity, current_pixel_size=px_ref)
 
     return Intensity    
 
@@ -141,6 +144,7 @@ def Experiment_Phase_Stepping(n, Detector, Source, Geometry, Objects, G1, G2, TL
     images_reference = []
 
     for N in tqdm(range(0,steps), desc='phase steps'):
+        M_step = Geometry.calculate_magnification(z_G1, z_det, conical)
         if Movable_Grating == 'G2':
             G2_step = N*step_length
             G1_step = 0
@@ -159,7 +163,7 @@ def Experiment_Phase_Stepping(n, Detector, Source, Geometry, Objects, G1, G2, TL
 
             u = np.ones((n, n), dtype=np.complex128)
             z_prev = z_ref
-            px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_prev, conical)
+            #px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_prev, conical)# Previous Implementation
 
             u,z_prev, px, = Propagate_Objects(Objects_sorted, Geometry, energy, padding, px_ref, z_ref, conical) 
 
@@ -167,10 +171,12 @@ def Experiment_Phase_Stepping(n, Detector, Source, Geometry, Objects, G1, G2, TL
                 dz = z_det - z_prev
                 
                 M = Geometry.calculate_magnification(z_prev, z_det, conical)
-                u = prop.propagate(u, px, dz / M, energy, padding=padding)
-                px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_det, conical)
+                #print(dz, M)
+                u = prop.propagate(u, px_ref, dz / M, energy, padding=padding)
+                u = zoom_in(u, M)
+                #px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_det, conical) # Previous Implementation
 
-            T_g2 = G2.transmission_function(energy, px)
+            T_g2 = G2.transmission_function(energy, px_ref)
             u *= T_g2
 
             I_obj += np.abs(u) ** 2 * w
@@ -182,23 +188,25 @@ def Experiment_Phase_Stepping(n, Detector, Source, Geometry, Objects, G1, G2, TL
             dz = z_G1 - z_prev
             
             M = Geometry.calculate_magnification(z_prev, z_G1, conical)
-            uR = prop.propagate(uR, pxR, dz / M, energy, padding=padding)
-            pxR = Geometry.pixel_size_at_distance(px_ref, z_ref, z_G1, conical)
+            uR = prop.propagate(uR, px_ref, dz / M, energy, padding=padding)
+            uR = zoom_in(uR, M)
+            #pxR = Geometry.pixel_size_at_distance(px_ref, z_ref, z_G1, conical) # Previous Implementation
             z_prev = z_G1
 
-            T_g1_R = G1.transmission_function(energy, pxR)
+            T_g1_R = G1.transmission_function(energy, px_ref)
             
             uR *= T_g1_R
 
             if z_det > z_prev:
                 dz = z_det - z_prev
-                #print(dz)
                 M = Geometry.calculate_magnification(z_prev, z_det, conical)
-                uR = prop.propagate(uR, pxR, dz / M, energy, padding=padding)
-                pxR = Geometry.pixel_size_at_distance(px_ref, z_ref, z_det, conical)
-            T_g2_R = G2.transmission_function(energy, pxR)
+                uR = prop.propagate(uR, px_ref, dz / M, energy, padding=padding)
+                uR = zoom_in(uR, M)
+                #pxR = Geometry.pixel_size_at_distance(px_ref, z_ref, z_det, conical) # Previous Implementation
+            T_g2_R = G2.transmission_function(energy, px_ref)
 
             uR *= T_g2_R
+
 
             I_ref += np.abs(uR) ** 2 * w
 
@@ -230,11 +238,12 @@ def Propagate_Objects(Objects_sorted, Geometry, energy, padding,px_ref, z_ref, c
         if z_obj > z_prev:
             dz = z_obj - z_prev
             M  = Geometry.calculate_magnification(z_prev, z_obj, conical)
-            u  = prop.propagate(u, px, dz / M, energy, padding=padding)
-            px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_obj, conical)
+            u  = prop.propagate(u, px_ref, dz / M, energy, padding=padding)
+            u = zoom_in(u, M)
+            #px = Geometry.pixel_size_at_distance(px_ref, z_ref, z_obj, conical) # Previous Implementation
             z_prev = z_obj
 
-        T = obj.transmission_function(energy, px)
+        T = obj.transmission_function(energy, px_ref)
         u *= T
 
     return u, z_prev, px
@@ -332,4 +341,18 @@ def Experiment_Phase_Stepping_test(n, Detector, Source, Geometry, Objects, G1, G
 
     return images, images_reference
 
+def zoom_in(wavefront, factor):
+    height, width = wavefront.shape
+    new_height, new_width = int(height * factor), int(width * factor)
+    resized_real = cv2.resize(wavefront.real, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
+    resized_imag = cv2.resize(wavefront.imag, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
     
+    start_y = (new_height - height) // 2
+    start_x = (new_width - width) // 2
+    
+    zoomed_real = resized_real[start_y:start_y + height, start_x:start_x + width]
+    zoomed_imag = resized_imag[start_y:start_y + height, start_x:start_x + width]
+
+    zoomed_wavefront = zoomed_real + 1j * zoomed_imag
+    
+    return zoomed_wavefront

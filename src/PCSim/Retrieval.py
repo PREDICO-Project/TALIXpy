@@ -69,6 +69,7 @@ def DPC_Retrieval(images, images_reference):
   o_r, p_r, v_r = FFT_Algorithm(images_reference)
 
   DPC = p-p_r
+  DPC = check_limits_DPC(DPC)
  
   DF = v/v_r
   At = -np.log(o/o_r)
