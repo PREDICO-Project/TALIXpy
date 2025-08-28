@@ -22,13 +22,6 @@ def Talbot_carpet(n, Source, period, DC, Talbot_multiple, steps, grating_type, p
 
     Talbot_distance = 2*period**2/(wavelength) *10**(-4) # cm.
 
-    if grating_type == 'phase_pi':
-        fraction = 1/16
-    elif grating_type == 'phase_pi_2':
-        fraction = 1/4
-    else:
-        fraction = 1
-
     distances = np.linspace(0, Talbot_multiple*Talbot_distance, steps)
     Talbot_carpet = np.zeros((n, steps))
 
