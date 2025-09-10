@@ -146,3 +146,20 @@ def convolve(psf, image):
     PSF = np.fft.fft2(np.fft.ifftshift(psf))
     image_conv = np.fft.fftshift(np.fft.ifft2(I*PSF)).real  
     return image_conv
+
+def check_grating_sampling(period_px):
+    print(period_px)
+    if (period_px / 2) % 1 != 0:  
+        print(
+            f"WARNING: The half of the period of the grating ({period_px/2:.2f} px) is not an even number of pixels, the gratings may not be symmetrical.")
+
+def check_phase_stepping(n_steps, period_px, step_size_px):
+
+    total_shift = n_steps * step_size_px
+    if total_shift < period_px:
+        print(
+            f"WARNING: The number of ({n_steps}) does not cover a full period of the grating ({period_px:.2f} px)."
+        )
+    elif total_shift % period_px != 0:
+        print(
+            f"WARNING: The total number of steps ({total_shift:.2f} px) is not an exact multiple of the G2 period ({period_px:.2f} px). Errors in the reconstruction can appear.")
