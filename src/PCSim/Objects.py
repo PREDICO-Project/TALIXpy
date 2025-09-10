@@ -169,74 +169,87 @@ class Grating(GeometricObject):
         self.angle = angle
         self.design_energy = design_energy
         
-        if thickness_um is not None:
-            self.thickness = thickness_um
-        else:
-            self.thickness = self.calculate_thickness()
-
+        self.thickness = thickness_um
+   
         self.check_grating_sampling()
         #self.projection = self.make_geometry()
 
         #self.object = self.movable_Grating()   
 
-    def calculate_thickness(self):
+    def transmission_function(self, energy, pixel_size):
         if self.grating_type in ['phase_pi', 'phase_pi_2']:
-            if self.design_energy is None:
-                raise ValueError("Design Energy must be specified for phase gratings.")
-            
-            wavelength = 1.23984193/(1000*self.design_energy) # in um
-            refr_index = self.set_refr_index(self.design_energy)
-            delta_phi_target = np.pi if self.grating_type == 'phase_pi' else np.pi/2
-            k = 2*np.pi/wavelength
-            thickness = delta_phi_target / (k * refr_index)
-            return thickness
-        else:
-            raise ValueError("Unknown grating type")
-        
-    def make_geometry(self, n, pixel_size):
+            phi = np.pi if self.grating_type == 'phase_pi' else (0.5*np.pi)
+            mask = self.movable_Grating(self.n, pixel_size, self.step)
+            return np.exp(-1j * phi * mask)
+
+        return super().transmission_function(energy, pixel_size)
     
+    def make_binary_grating(self, n, pixel_size):
         period = self.period
         step = self.step
         DC = self.DC
-        thickness = self.thickness
-        # If you want a non-movable grating just 'step'=0.
-        #% It returns the thickness of a grating which moves whith a determined step. 
-        #% The step should be an integer, it is a step in the "pixel space".
+        #% It returns a binary grating 
         out_original = np.zeros((n, n))
         out = np.zeros((n, n))
-        periodo = int(np.round(period / pixel_size)) #In pixels
-        N=int(step/pixel_size) # step in pixels
-        m=N/periodo
-        not_zeros = int(DC * periodo)
-        zeros = int((1-DC) * periodo)
+        period_px = int(np.round(period / pixel_size)) #In pixels
         
-        for i in range(-not_zeros,zeros):
+        not_zeros = int(DC * period_px)
+        zeros = int((1-DC) * period_px)
+        #print(not_zeros)
+        #print(zeros)
+        #print(period_px//2)
+        for i in range(-not_zeros, zeros):
+        #for i in range(-period_px//2,period_px//2):
+            #print(i)
             if i<0:
-                i=i+periodo
-                out_original[:,(i)::periodo] = 1
-        for i in range(-not_zeros,zeros):
-            if i<0:
-                i=i+periodo
-                out[:,(i+N)::periodo] = 1        
-        for i in range(0,N):
-            #out[:,N-i]=out_original[:,-(i+periodo//2)]
-            out[:,i] = out_original[:,-i]
+                i=i+period_px
+                out[:,(i)::period_px] = 1
+        return out
+    
+    def movable_Grating(self, n, pixel_size, step_um):
+        H = W = int(n)
+        px = float(pixel_size)
+        mask = self.make_binary_grating(H, px)
+        
+        shift_px = step_um / px
+        #print(shift_px)
+        mask = self.fourier_shift_x(mask, shift_px)
 
-        thickness_gr = out*thickness
+        if self.x_shift_px:
+            mask = np.roll(mask, int(self.x_shift_px), axis=1)
+        if self.y_shift_px:
+            mask = np.roll(mask, int(self.y_shift_px), axis=0)
+
         if self.angle != 0:
-            
-            pad_pixels = int(np.ceil(np.sqrt(2) * n - n) / 2)
-            thickness_gr = np.pad(thickness_gr, ((pad_pixels,pad_pixels),(pad_pixels,pad_pixels)), 'wrap')
-            thickness_gr = rotate(thickness_gr, self.angle, reshape=False)
-            #plt.imshow(thickness_gr)
-            #plt.show()
-            thickness_gr = thickness_gr[pad_pixels:pad_pixels+n, pad_pixels:pad_pixels+n]
+            pad = int(np.ceil(np.sqrt(2) * H - H) / 2)
+            m2 = np.pad(mask, ((pad, pad), (pad, pad)), mode='wrap')
+            m2 = rotate(m2, self.angle, reshape=False, order=0, mode='wrap')
+            mask = m2[pad:pad+H, pad:pad+W]
 
-        return  thickness_gr
+        return mask
+    
+    def fourier_shift_x(self, image, shift_px):
+        """Shift an image in x by a fractional number of pixels using Fourier shift theorem."""
+        if shift_px == 0:
+            return image
+        H, W = image.shape
+        fx = np.fft.fftfreq(W)
+        fy = np.fft.fftfreq(H)
+        FX, FY = np.meshgrid(fx, fy)
+        shift_phase = np.exp(-2j * np.pi * FX * shift_px)
+        image_ft = np.fft.fft2(image)
+        shifted_image = np.fft.ifft2(image_ft * shift_phase).real
+        return  np.clip(shifted_image, 0.0, 1.0)    
+    
+    def make_geometry(self, n, pixel_size):
+        if self.grating_type in ['phase_pi', 'phase_pi_2']:
+            
+            return np.zeros((n, n), dtype=np.float32)
+        return self.thickness * self.movable_Grating(n, pixel_size, self.step)
 
     def update_step(self, new_step):
         self.step = new_step
-        self.projection = self.make_geometry(self.n, self.pixel_size_init)
+        #self.projection = self.make_geometry(self.n, self.pixel_size_init)
 
     def get_Talbot_distance(self):
         wavelength = 1.23984193/(1000*self.design_energy)
@@ -248,7 +261,76 @@ class Grating(GeometricObject):
         Sampling condition for gratings. To avoid aliasing, 5-6 pixel per period are recommended, but not strictly necessary.
         """
         if self.pixel_size_init > self.period/6:
-            warnings.warn(f"[Grating sampling warning] Pixel size ({self.period:.3g}) may be too large compared to grating period ({self.period:.3g}). Please consider to reduce the pixel size or increase the grating period.")
+            warnings.warn(f"[Grating sampling warning] Pixel size ({self.pixel_size_init:.3g}) may be too large compared to grating period ({self.period:.3g}). Please consider to reduce the pixel size or increase the grating period.")
 
+class DoubleSlit(GeometricObject):
 
+    def __init__(self, n, slit_width, center_distance, screen_thickness, pixel_size, material, DSO, slit_height=None,x_shift_px=0, y_shift_px=0):
+        super().__init__(n, pixel_size, material, DSO,
+                         x_shift_px=x_shift_px, y_shift_px=y_shift_px)
+        self.slit_width = slit_width
+        self.center_distance = center_distance
+        self.screen_thickness = screen_thickness
+        self.slit_height = None if slit_height is None else slit_height
+
+    def make_geometry(self, n, pixel_size):
+        y, x = np.mgrid[(-n - self.y_shift_px)//2 : (n - self.y_shift_px)//2, (-n - self.x_shift_px)//2 : (n - self.x_shift_px)//2]
+
+        x = (x + 0.5) * pixel_size
+        y = (y + 0.5) * pixel_size
+
+        img = np.full((n, n), self.screen_thickness, dtype=float)
         
+        half_d = 0.5 * self.center_distance
+        half_w = 0.5 * self.slit_width
+
+        mask_left_x  = np.abs(x + half_d) <= half_w
+        mask_right_x = np.abs(x - half_d) <= half_w
+
+        if self.slit_height is None:
+            mask_y = np.ones_like(y, dtype=bool)   # rendijas a lo largo de todo Y
+        else:
+            mask_y = np.abs(y) <= (0.5 * self.slit_height)
+
+        slit_mask = (mask_y & (mask_left_x | mask_right_x))
+        single_slit = (mask_y & mask_left_x)
+        img[slit_mask] = 0.0
+        #img[single_slit] = 0.0
+
+        return img
+class KnifeEdge(GeometricObject):
+
+    def __init__(self, n, pixel_size, material, DSO, orientation='vertical', blocked_side='left', screen_thickness=50.0, edge_offset_um=0.0, x_shift_px=0, y_shift_px=0):
+        super().__init__(n, pixel_size, material, DSO, x_shift_px=x_shift_px, y_shift_px=y_shift_px)
+        self.orientation = orientation.lower()
+        self.blocked_side = blocked_side.lower()
+        self.screen_thickness = screen_thickness
+        self.edge_offset_um = edge_offset_um
+
+        if self.orientation not in ('vertical', 'horizontal'):
+            raise ValueError("orientation must be 'vertical' or 'horizontal'.")
+        if self.orientation == 'vertical' and self.blocked_side not in ('left', 'right'):
+            raise ValueError("blocked_side for orientation='vertical' must be 'left' or 'right'.")
+        if self.orientation == 'horizontal' and self.blocked_side not in ('up', 'down'):
+            raise ValueError("blocked_side for orientation='horizontal' must be 'up' or 'down'.")
+
+    def make_geometry(self, n, pixel_size):
+        y, x = np.mgrid[(-n - self.y_shift_px)//2 : (n - self.y_shift_px)//2, (-n - self.x_shift_px)//2 : (n - self.x_shift_px)//2]
+        x = (x + 0.5) * pixel_size
+        y = (y + 0.5) * pixel_size
+
+        thickness = np.zeros((n, n), dtype=float)
+
+        if self.orientation == 'vertical':
+            if self.blocked_side == 'left':
+                mask = (x < self.edge_offset_um)
+            else:
+                mask = (x > self.edge_offset_um)
+        else:
+            if self.blocked_side == 'down':
+                mask = (y < self.edge_offset_um)
+            else:
+                mask = (y > self.edge_offset_um)
+
+        thickness[mask] = self.screen_thickness
+        return thickness
