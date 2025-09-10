@@ -139,6 +139,10 @@ def Experiment_Phase_Stepping(n, Detector, Source, Geometry, Objects, G1, G2, TL
     z_ref = min(z_G1, Objects_sorted[0].DSO) # reference plane, G1 or the first Object
 
     px_ref = Source.pixel_size  # Pixel size at the beginning (source plane)
+
+    utils.check_grating_sampling(G1.period/pixel_size)
+    utils.check_grating_sampling(G2.period/pixel_size)
+    utils.check_phase_stepping(steps, G2.period/pixel_size, step_length)
  
     images = []
     images_reference = []
